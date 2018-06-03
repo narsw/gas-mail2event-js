@@ -1,3 +1,8 @@
+/* ############################
+GMail2Event
+Auther: Naruaki Shimizu
+ ############################ */
+
 /* -----------------------------
 mailEventクラス
 メール内容からイベント情報を抽出する
@@ -59,6 +64,9 @@ mailEvent4amzn.prototype = new mailEvent();
 /* -----------------------------
 getEventメソッド
 メッセージから日程と予約番号を取得する
+日程をstartDate,endDateに設定
+終日の場合はisAllDayにフラグ設定
+予約番号をdescriptionに設定
 引数：
 <message型>message
 返り値：
@@ -104,10 +112,12 @@ mailEvent4amzn.prototype.getEvent = function(message){
   }
   
   if (dateArray != null){
+    // 日付文字列を分解し、Date型に変換
     var [sMatched, sMonth, sDay, sHour, sMin] = dateArray[0].match(dateExpWithSubString);
     var [eMatched, eMonth, eDay, eHour, eMin] = dateArray[1].match(dateExpWithSubString);
     this.startDate = new Date(year, sMonth - 1, sDay, sHour, sMin);
     this.endDate = new Date(year, eMonth - 1, eDay, eHour, eMin);
+    // Descriptionに注文番号情報を設定
     this.description = "注文番号:"+strOrderNo;
   }else{
     return false;
@@ -146,9 +156,6 @@ mailEvent4careco.prototype.getEvent = function(message){
   if(reserveNo.length == 2){
     strReserveNo = reserveNo[1];
   }
-  //Logger.log(strReserveNo);
-  //Logger.log(body.match(/(\d{4}\/\d{2}\/\d{2}.{4}\d{2}:\d{2})/g));
-  //Logger.log(body.match(dateExp_datetime));
   
   this.isAllDay = false;
   // 日付、時刻を取得 ex. [2018/05/26(土) 19:40,2018/05/26(土) 23:40]
@@ -160,10 +167,12 @@ mailEvent4careco.prototype.getEvent = function(message){
     // 日時が2つ取れなければエラー
     return false;
   }else{
+    // 日付文字列を分解し、Date型に変換
     var [sMatched, sYear, sMonth, sDay, sHour, sMin] = dateArray[0].match(dateExpWithSubString);
     var [eMatched, eYear, eMonth, eDay, eHour, eMin] = dateArray[1].match(dateExpWithSubString);
     this.startDate = new Date(sYear, sMonth - 1, sDay, sHour, sMin);
     this.endDate = new Date(eYear, eMonth - 1, eDay, eHour, eMin);
+    // Descriptionに予約番号情報を設定
     this.description = "予約番号:"+strReserveNo;
   }
   
@@ -177,6 +186,7 @@ Gmailから予定表にイベント登録する
 返り値：なし
  ----------------------------- */
 function mail2cal() {
+  // Criteriaは基本的に「is:unread」を含めて指定し、既読/未読で登録済みの管理をする
   // Amazonのイベント検索
   var amzn = new mailEvent4amzn();
   amzn.setCriteria("is:unread from:(Amazon.co.jp) ご注文の確認");
@@ -205,11 +215,14 @@ function searchEvent(mailEvent){
   GmailApp.search(mailEvent.criteria).forEach(function(thread) {
     var messages = thread.getMessages();
     messages.forEach(function(message) {
+      // メールから予定情報の抽出
       var result = mailEvent.getEvent(message);
 
       if(result){
         cntEvent++;
+        // 予定表への登録
         createCalenderEvent(mailEvent.title, mailEvent.startDate, mailEvent.endDate, mailEvent.description, mailEvent.isAllDay);
+        // メールを既読へ変更
         message.markRead();
         
         Logger.log("タイトル："+mailEvent.title+"　内容："+mailEvent.description);
@@ -248,7 +261,6 @@ function createCalenderEvent(title, startDate, endDate, description, isAllDay){
   }else{
     var event = CalendarApp.getDefaultCalendar().createEvent(title, startDate, endDate, { description : description　});
   }
-  Logger.log(event.getId());
 }
 
 // Util
