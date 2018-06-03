@@ -40,3 +40,8 @@ mailEvent4amzn.prototype.getEvent = function(message){
   amzn.setTitle("Amazon荷物");
   searchEvent(amzn);
 ```
+
+# 参考にしたサイト  
+下記サイトを参考にし、コードに含めています。  
+- http://gawawa124.hatenablog.com/entry/2017/06/15/155242
+- https://www.sejuku.net/blog/23064
