@@ -13,6 +13,8 @@ Google Apps ScriptにてGMailのメールから予定表にイベントを追加
 mailEventクラスを継承してAmazonのメールに対応させたクラス
 - mailEvent4careco.js  
 mailEventクラスを継承してCarecoのメールに対応させたクラス
+- mailEvent4timescarplus.js  
+mailEventクラスを継承してタイムズカープラスのメールに対応させたクラス
 - utils.js  
 Tool的な関数をまとめたファイル
 
